@@ -77,6 +77,7 @@
   <a href="#brand-dna">Brand DNA 추출</a>
   <a href="#angles">16개 전략 앵글</a>
   <a href="#types">광고 유형 50개</a>
+  <a href="#image">🖼️ 이미지 생성</a>
   <a href="#combo">콤보 프롬프트</a>
 </nav>
 
@@ -198,6 +199,156 @@ URL: [상세페이지 URL]
     <h2>📋 광고 유형 라이브러리 50개</h2>
     <div class="tip-box"><strong>사용법.</strong> 유형 카드를 클릭하면 해당 유형에 맞는 카피 프롬프트가 나옵니다.</div>
     <div id="typeLibrary"></div>
+  </section>
+
+  <!-- 이미지 생성 -->
+  <section id="image">
+    <h2>🖼️ 이미지 생성 프롬프트 (DALL-E / ChatGPT)</h2>
+    <div class="tip-box"><strong>워크플로우.</strong> 아래 프롬프트를 Claude에 넣으면 → DALL-E용 이미지 프롬프트가 나옵니다 → 그걸 ChatGPT에 붙여넣으면 → 광고 이미지 완성.</div>
+
+    <div class="prompt-card">
+      <div class="card-header">
+        <span class="card-title">Step 1 — 제품 이미지 → 광고 이미지 프롬프트 생성</span>
+        <button class="copy-btn" onclick="copyPrompt(this, 'img1')">복사</button>
+      </div>
+      <pre id="img1">아래 제품 정보와 Brand DNA를 바탕으로 DALL-E(ChatGPT)에 넣을 광고 이미지 프롬프트를 만들어줘.
+
+【제품 정보】
+제품명:
+제품 색상/형태:
+주요 특징:
+
+【Brand DNA】
+[Brand DNA 붙여넣기]
+
+【광고 방향】
+앵글: [16개 앵글 중 선택]
+무드: [클린 미니멀 / 럭셔리 / 비비드 팝 / 내추럴 / 에디토리얼 / 다크 무드 중 선택]
+비율: [1:1 / 4:5 / 9:16 / 16:9 중 선택]
+배경: [흰 배경 / 라이프스타일 / 스튜디오 / 야외 / 기타]
+
+출력 형식:
+1. DALL-E 영문 프롬프트 (이미지 생성용)
+2. 네거티브 프롬프트 (피해야 할 요소)
+3. 이미지에 들어갈 광고 카피 텍스트 1줄</pre>
+    </div>
+
+    <div class="prompt-card">
+      <div class="card-header">
+        <span class="card-title">Step 2 — 레퍼런스 이미지 → 우리 브랜드 스타일로 변환</span>
+        <button class="copy-btn" onclick="copyPrompt(this, 'img2')">복사</button>
+      </div>
+      <pre id="img2">【ChatGPT에서 직접 사용 — 레퍼런스 이미지 업로드 후 아래 프롬프트 입력】
+
+첨부한 광고 이미지의 레이아웃, 구도, 조명, 분위기를 분석해줘.
+그리고 아래 우리 브랜드 정보에 맞게 동일한 스타일로 새 광고 이미지를 만들 DALL-E 프롬프트를 작성해줘.
+
+【우리 브랜드 정보】
+제품명:
+제품 색상/형태:
+브랜드 컬러:
+톤앤매너:
+
+출력:
+1. 레퍼런스 이미지 분석 요약
+2. 우리 브랜드 버전 DALL-E 영문 프롬프트
+3. 네거티브 프롬프트</pre>
+    </div>
+
+    <div class="prompt-card">
+      <div class="card-header">
+        <span class="card-title">Step 3 — 비율별 광고 이미지 세트 생성</span>
+        <button class="copy-btn" onclick="copyPrompt(this, 'img3')">복사</button>
+      </div>
+      <pre id="img3">아래 광고 콘셉트를 4가지 비율 버전으로 각각 DALL-E 프롬프트를 만들어줘.
+
+【광고 콘셉트】
+제품:
+무드/스타일:
+핵심 카피:
+Brand DNA 톤:
+
+【비율별 출력】
+① 1:1 — 인스타그램 피드 정방형
+② 4:5 — 인스타그램 피드 세로형
+③ 9:16 — 스토리 / 릴스 / 숏폼
+④ 16:9 — 유튜브 썸네일 / 배너
+
+각 비율마다 구도와 레이아웃이 어떻게 달라져야 하는지 설명 + DALL-E 프롬프트 제공.</pre>
+    </div>
+
+    <div class="prompt-card">
+      <div class="card-header">
+        <span class="card-title">Step 4 — 텍스트 포함 광고 이미지 (카피 + 비주얼 일체형)</span>
+        <button class="copy-btn" onclick="copyPrompt(this, 'img4')">복사</button>
+      </div>
+      <pre id="img4">광고 카피가 이미지 안에 자연스럽게 들어간 광고 비주얼을 만들 DALL-E 프롬프트를 작성해줘.
+
+【광고 정보】
+제품:
+헤드라인 카피: [예: "백탁 없이, 한 겹 가볍게"]
+서브 카피: [예: "SPF50+ PA++++"]
+브랜드 컬러:
+무드:
+비율:
+
+조건:
+- 텍스트가 이미지 구도 안에 자연스럽게 배치
+- 제품이 메인으로 보이게
+- 한국어/영어 중 선택: [한국어 / 영어]
+
+DALL-E 영문 프롬프트 + 텍스트 배치 설명 제공.</pre>
+    </div>
+
+    <div class="prompt-card">
+      <div class="card-header">
+        <span class="card-title">Step 5 — 다국어 광고 이미지 세트</span>
+        <button class="copy-btn" onclick="copyPrompt(this, 'img5')">복사</button>
+      </div>
+      <pre id="img5">같은 광고 비주얼을 다국어 버전으로 만들 계획이야. 각 언어별로 카피를 현지화하고 DALL-E 프롬프트도 함께 제공해줘.
+
+【원본 광고】
+제품:
+원본 한국어 카피:
+비주얼 스타일:
+비율:
+
+【출력 언어 선택】 (원하는 것 체크)
+□ 영어 (미국/글로벌)
+□ 영어 (영국)
+□ 일본어
+□ 중국어 간체
+□ 프랑스어
+□ 기타:
+
+각 언어별로:
+1. 현지화된 카피 (직역 X, 감성 현지화)
+2. 해당 언어 버전 DALL-E 프롬프트
+3. 현지 시장 광고 감성 포인트 한 줄 설명</pre>
+    </div>
+
+    <div class="prompt-card">
+      <div class="card-header">
+        <span class="card-title">무드 프리셋 — 같은 제품 다른 분위기</span>
+        <button class="copy-btn" onclick="copyPrompt(this, 'img6')">복사</button>
+      </div>
+      <pre id="img6">같은 제품을 6가지 무드로 광고 이미지 프롬프트를 만들어줘. A/B 테스트용이야.
+
+【제품 정보】
+제품명:
+제품 색상/형태:
+Brand DNA:
+
+【6가지 무드별 DALL-E 프롬프트】
+① 클린 미니멀 — 흰 배경, 여백 강조, 심플
+② 럭셔리 — 어두운 배경, 골드/실버 포인트, 고급스러운 조명
+③ 비비드 팝 — 원색 배경, 강렬한 색감, 트렌디
+④ 내추럴 — 자연광, 식물/텍스처 배경, 따뜻한 톤
+⑤ 에디토리얼 — 패션 매거진 스타일, 모델 포함, 예술적
+⑥ 라이프스타일 — 실제 사용 장면, 일상적 배경
+
+각 무드마다 영문 DALL-E 프롬프트 + 어울리는 카피 톤 한 줄.</pre>
+    </div>
   </section>
 
   <!-- 콤보 프롬프트 -->
