@@ -3,865 +3,302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 광고 카피 자동화 플레이북</title>
+<title>AI 광고 자동화 플레이북</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: #0f0f0f; color: #e0e0e0; line-height: 1.7; }
+  body { font-family: 'Apple SD Gothic Neo', 'Pretendard', sans-serif; background: #0f0f0f; color: #e0e0e0; line-height: 1.7; min-height: 100vh; }
 
-  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 60px 40px; text-align: center; border-bottom: 1px solid #333; }
-  .header h1 { font-size: 2.2rem; font-weight: 800; color: #fff; letter-spacing: -0.5px; }
-  .header p { color: #aaa; margin-top: 10px; font-size: 1rem; }
-  .badge { display: inline-block; background: #e63946; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; }
+  header { padding: 48px 24px 32px; text-align: center; }
+  header h1 { font-size: 1.8rem; font-weight: 800; color: #fff; }
+  header p { color: #888; margin-top: 8px; font-size: 0.9rem; }
 
-  .nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; padding: 20px 40px; background: #141414; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 100; }
-  .nav a { color: #aaa; text-decoration: none; font-size: 0.82rem; padding: 6px 14px; border: 1px solid #333; border-radius: 20px; transition: all 0.2s; }
-  .nav a:hover { color: #fff; border-color: #666; background: #222; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 24px 40px; }
+  .flow-step { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px 16px; font-size: 0.82rem; color: #ccc; text-align: center; }
+  .flow-step span { display: block; font-size: 0.7rem; color: #e63946; font-weight: 700; margin-bottom: 2px; }
+  .arrow { color: #444; font-size: 1.2rem; }
 
-  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
-  section { margin-bottom: 60px; }
-  h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #e63946; display: flex; align-items: center; gap: 10px; }
-  h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin: 20px 0 10px; }
+  .container { max-width: 720px; margin: 0 auto; padding: 0 20px 80px; }
 
-  .workflow { display: flex; gap: 0; margin-bottom: 40px; flex-wrap: wrap; }
-  .workflow-step { flex: 1; min-width: 140px; background: #1a1a1a; border: 1px solid #2a2a2a; padding: 18px 14px; text-align: center; position: relative; }
-  .workflow-step:not(:last-child)::after { content: '→'; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); color: #e63946; font-size: 1.2rem; z-index: 1; }
-  .workflow-step .num { font-size: 1.4rem; color: #e63946; font-weight: 800; }
-  .workflow-step .label { font-size: 0.78rem; color: #aaa; margin-top: 4px; }
+  .card { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; margin-bottom: 16px; overflow: hidden; }
+  .card-head { padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+  .card-head:hover { background: #1c1c1c; }
+  .card-title { font-size: 0.95rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+  .card-title .step-badge { background: #e63946; color: #fff; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+  .card-sub { font-size: 0.78rem; color: #666; }
+  .chevron { color: #555; transition: transform 0.2s; font-size: 0.9rem; }
+  .card.open .chevron { transform: rotate(180deg); }
 
-  .prompt-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; margin-bottom: 20px; overflow: hidden; }
-  .prompt-card .card-header { background: #222; padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a2a; }
-  .prompt-card .card-title { font-size: 0.9rem; font-weight: 700; color: #fff; }
-  .prompt-card .tag { font-size: 0.72rem; color: #aaa; background: #333; padding: 2px 8px; border-radius: 10px; }
-  .prompt-card pre { padding: 18px; font-family: 'Consolas', monospace; font-size: 0.83rem; color: #ccc; white-space: pre-wrap; line-height: 1.8; }
-  .copy-btn { background: #e63946; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: background 0.2s; }
+  .card-body { display: none; padding: 0 20px 20px; }
+  .card.open .card-body { display: block; }
+
+  .prompt-box { background: #0d0d0d; border: 1px solid #222; border-radius: 8px; padding: 18px; font-family: 'Consolas', monospace; font-size: 0.82rem; color: #ccc; white-space: pre-wrap; line-height: 1.9; }
+
+  .copy-btn { background: #e63946; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; display: block; }
   .copy-btn:hover { background: #c1121f; }
   .copy-btn.copied { background: #2a9d8f; }
 
-  .angle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .angle-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; cursor: pointer; transition: border-color 0.2s; }
-  .angle-card:hover { border-color: #e63946; }
-  .angle-card .num { font-size: 0.72rem; color: #e63946; font-weight: 700; margin-bottom: 4px; }
-  .angle-card .name { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
-  .angle-card .desc { font-size: 0.8rem; color: #999; }
-  .angle-detail { display: none; background: #111; border: 1px solid #e63946; border-radius: 8px; margin-top: -8px; margin-bottom: 14px; padding: 16px 18px; }
-  .angle-detail pre { font-family: 'Consolas', monospace; font-size: 0.82rem; color: #ccc; white-space: pre-wrap; line-height: 1.8; }
-  .angle-detail .detail-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .tip { background: #1a1a1a; border-left: 3px solid #e63946; padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 0.82rem; color: #aaa; margin-bottom: 12px; }
+  .tip strong { color: #e63946; }
 
-  .type-category { margin-bottom: 32px; }
-  .type-category h3 { color: #e63946; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
-  .type-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
-  .type-item { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; padding: 12px 14px; cursor: pointer; transition: all 0.2s; }
-  .type-item:hover { border-color: #555; background: #222; }
-  .type-item .type-num { font-size: 0.7rem; color: #666; margin-bottom: 2px; }
-  .type-item .type-name { font-size: 0.88rem; font-weight: 600; color: #ddd; }
-  .type-item .type-hook { font-size: 0.75rem; color: #888; margin-top: 4px; }
-  .type-detail { display: none; grid-column: 1 / -1; background: #111; border: 1px solid #444; border-radius: 8px; padding: 16px 18px; margin-top: 4px; }
-  .type-detail pre { font-family: 'Consolas', monospace; font-size: 0.82rem; color: #ccc; white-space: pre-wrap; line-height: 1.8; }
+  .option-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; }
+  .opt-label { font-size: 0.75rem; color: #888; margin-bottom: 6px; }
+  .opt-chip { background: #222; border: 1px solid #333; color: #bbb; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; transition: all 0.15s; }
+  .opt-chip:hover, .opt-chip.active { background: #e63946; border-color: #e63946; color: #fff; }
 
-  .tip-box { background: #1a1a1a; border-left: 3px solid #e63946; padding: 14px 18px; border-radius: 0 6px 6px 0; margin: 16px 0; font-size: 0.85rem; color: #bbb; }
-  .tip-box strong { color: #e63946; }
+  h2 { font-size: 0.75rem; font-weight: 700; color: #555; letter-spacing: 2px; text-transform: uppercase; margin: 36px 0 12px; }
 
-  footer { text-align: center; padding: 40px; color: #555; font-size: 0.8rem; border-top: 1px solid #222; }
+  .master { background: linear-gradient(135deg, #1a0a0a, #1a1a2e); border: 1px solid #e63946; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .master-title { font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .master-sub { font-size: 0.82rem; color: #aaa; margin-bottom: 16px; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="badge">PERSONAL PLAYBOOK v1.0</div>
-  <h1>AI 광고 카피 자동화 플레이북</h1>
-  <p>Brand DNA 추출 → 앵글 선택 → 카피 생성 · 복붙으로 바로 사용</p>
-</div>
+<header>
+  <h1>AI 광고 자동화 플레이북</h1>
+  <p>URL 입력 → Brand DNA → 카피 → 이미지 프롬프트 · 한 흐름으로</p>
+</header>
 
-<nav class="nav">
-  <a href="#workflow">워크플로우</a>
-  <a href="#brand-dna">Brand DNA 추출</a>
-  <a href="#angles">16개 전략 앵글</a>
-  <a href="#types">광고 유형 50개</a>
-  <a href="#image">🖼️ 이미지 생성</a>
-  <a href="#combo">콤보 프롬프트</a>
-</nav>
+<div class="flow">
+  <div class="flow-step"><span>STEP 1</span>URL 입력</div>
+  <div class="arrow">→</div>
+  <div class="flow-step"><span>STEP 2</span>Brand DNA</div>
+  <div class="arrow">→</div>
+  <div class="flow-step"><span>STEP 3</span>앵글 + 카피</div>
+  <div class="arrow">→</div>
+  <div class="flow-step"><span>STEP 4</span>이미지 프롬프트</div>
+  <div class="arrow">→</div>
+  <div class="flow-step"><span>STEP 5</span>ChatGPT → 이미지</div>
+</div>
 
 <div class="container">
 
-  <!-- 워크플로우 -->
-  <section id="workflow">
-    <h2>⚡ 워크플로우</h2>
-    <div class="workflow">
-      <div class="workflow-step"><div class="num">1</div><div class="label">Brand DNA<br>추출</div></div>
-      <div class="workflow-step"><div class="num">2</div><div class="label">앵글<br>선택</div></div>
-      <div class="workflow-step"><div class="num">3</div><div class="label">광고 유형<br>선택</div></div>
-      <div class="workflow-step"><div class="num">4</div><div class="label">콤보 프롬프트<br>실행</div></div>
-      <div class="workflow-step"><div class="num">5</div><div class="label">카피<br>완성</div></div>
-    </div>
-    <div class="tip-box"><strong>TIP.</strong> Brand DNA는 한 번만 추출해두고 저장해놓으면 이후 모든 광고에 재사용 가능합니다.</div>
-  </section>
-
-  <!-- Brand DNA -->
-  <section id="brand-dna">
-    <h2>🧬 Brand DNA 추출 프롬프트</h2>
-
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Version 1 — URL 있을 때</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'dna1')">복사</button>
-      </div>
-      <pre id="dna1">다음 브랜드/쇼핑몰 URL을 분석해서 Brand DNA를 추출해줘.
+  <!-- 마스터 올인원 -->
+  <div class="master">
+    <div class="master-title">⚡ 원클릭 마스터 프롬프트</div>
+    <div class="master-sub">URL만 넣으면 DNA → 카피 → DALL-E 이미지 프롬프트까지 한 번에 나옵니다.</div>
+    <div class="prompt-box" id="master-prompt">아래 URL을 분석해서 광고 소재 한 세트를 만들어줘.
 
 URL: [여기에 URL 입력]
 
-아래 6개 레이어 형식으로 정리해줘:
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+【STEP 1】 Brand DNA 추출
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+위 URL을 분석해서 아래 항목을 정리해줘:
+- 브랜드 정체성 (한 줄)
+- 핵심 USP (경쟁사 대비 차별점)
+- 타깃 고객 (나이/성별/고통점/욕구)
+- 톤앤매너 (말투 + 감성 키워드 3개)
+- 주요 제품 + 핵심 스펙/성분
+- 사회적 증거 (수치/수상/후기 키워드)
 
-【1. 브랜드 정체성】
-- 이 브랜드는 어떤 사람을 위한 브랜드인가
-- 브랜드 성격과 세계관 (3단어로 표현)
-- 한 줄 브랜드 에센스
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+【STEP 2】 광고 카피 3세트
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+위 Brand DNA를 바탕으로 아래 3가지 앵글로 각각 카피를 만들어줘.
+각 카피는 헤드라인 1줄 + 본문 3줄 + CTA 1줄 구성.
 
-【2. 핵심 USP】
-- 경쟁사 대비 단 하나의 차별화 강점
-- 고객이 이 브랜드를 선택하는 진짜 이유
+① 공감 앵글 — 타깃의 고통에 공감하고 해결책 제시
+② 결과 앵글 — 구체적 수치/변화로 신뢰 형성
+③ 라이프스타일 앵글 — 이 제품을 쓰는 나의 모습 묘사
 
-【3. 타깃 고객】
-- 인구통계 (나이대, 성별, 직업군)
-- 라이프스타일 키워드 3개
-- 핵심 고통점 (Pain Point) 2개
-- 핵심 욕구 (Desire) 2개
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+【STEP 3】 DALL-E 이미지 프롬프트 3개
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+위 카피 3개에 각각 어울리는 광고 이미지를 만들 DALL-E 영문 프롬프트를 작성해줘.
 
-【4. 톤앤매너】
-- 말투 스타일 (예: 친근한 반말 / 신뢰감 있는 존댓말 / 전문가적)
-- 감성 키워드 5개
-- 피해야 할 표현
+각 프롬프트에 포함할 것:
+- 제품 묘사 (색상, 형태)
+- 배경 및 구도
+- 조명 및 분위기
+- 광고 무드 (클린 / 감성 / 에디토리얼 중 자동 선택)
+- 비율: 1:1 (인스타 피드 기준)
+- 네거티브 프롬프트 별도 제공
 
-【5. 주요 제품/서비스】
-- 카테고리 및 가격대
-- 베스트셀러 제품명 + 핵심 기능
-- 자주 쓰는 광고 문구 패턴
+위 3단계를 순서대로 모두 출력해줘.</div>
+    <button class="copy-btn" onclick="copyEl(this,'master-prompt')">복사하기</button>
+  </div>
 
-【6. 사회적 증거】
-- 수상/인증/언론 언급
-- 누적 판매/사용자 수
-- 고객 후기에 자주 나오는 키워드</pre>
+  <h2>상황별 추가 프롬프트</h2>
+
+  <!-- 카드들 -->
+  <div class="card" id="c1">
+    <div class="card-head" onclick="toggle('c1')">
+      <div class="card-title"><span class="step-badge">비율</span>비율별 이미지 세트 만들기</div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="card-sub">1:1 / 4:5 / 9:16 / 16:9</div><span class="chevron">▼</span></div>
     </div>
+    <div class="card-body">
+      <div class="tip"><strong>사용법.</strong> 마스터 프롬프트 실행 후, 마음에 드는 카피 하나를 골라서 아래 프롬프트에 넣으세요.</div>
+      <div class="prompt-box" id="p1">위에서 만든 카피 중 아래 것을 골랐어:
 
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Version 2 — URL 없을 때 (직접 입력)</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'dna2')">복사</button>
-      </div>
-      <pre id="dna2">아래 정보를 바탕으로 Brand DNA를 완성해줘. 정보가 없는 항목은 제공된 내용에서 추론해서 채워줘.
+[카피 붙여넣기]
 
-브랜드명:
-제품/서비스:
-주요 타깃:
-가격대:
-경쟁사 (알면):
-브랜드 강점:
-추가 메모:
+이 카피와 Brand DNA를 바탕으로 4가지 비율 버전 DALL-E 프롬프트를 만들어줘.
 
-위 정보를 바탕으로 6개 레이어로 정리:
+① 1:1 — 인스타그램 피드 정방형
+   구도: 제품 중앙, 여백 균등
 
-【1. 브랜드 정체성】
-【2. 핵심 USP】
-【3. 타깃 고객】 (Pain Point + Desire 포함)
-【4. 톤앤매너】
-【5. 주요 제품/서비스】
-【6. 사회적 증거】 (없으면 활용 가능한 증거 유형 제안)</pre>
+② 4:5 — 인스타그램 피드 세로
+   구도: 제품 하단, 텍스트 공간 상단 확보
+
+③ 9:16 — 스토리 / 릴스
+   구도: 제품 중하단, 상단 헤드라인 공간
+
+④ 16:9 — 유튜브 배너 / 가로 배너
+   구도: 제품 우측, 카피 좌측 배치
+
+각 비율마다 DALL-E 영문 프롬프트 + 네거티브 프롬프트 제공.</div>
+      <button class="copy-btn" onclick="copyEl(this,'p1')">복사</button>
     </div>
+  </div>
 
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Version 3 — 상세페이지 URL 스크랩형</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'dna3')">복사</button>
-      </div>
-      <pre id="dna3">다음 상세페이지 URL을 읽고 광고 카피에 쓸 수 있는 소재를 모두 추출해줘.
-
-URL: [상세페이지 URL]
-
-추출 항목:
-1. 헤드라인 후보 (페이지에서 강조된 문구)
-2. 핵심 성분/기능/스펙
-3. 임상/실험 데이터 (수치 포함)
-4. 고객 후기 핵심 문장 3개
-5. 인증/수상 내역
-6. 가격 및 혜택 구조
-7. 광고에 바로 쓸 수 있는 팩트 10개 (bullet point)</pre>
+  <div class="card" id="c2">
+    <div class="card-head" onclick="toggle('c2')">
+      <div class="card-title"><span class="step-badge">레퍼런스</span>경쟁사 광고 스타일 → 우리 브랜드로</div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="card-sub">이미지 업로드 후 사용</div><span class="chevron">▼</span></div>
     </div>
-  </section>
+    <div class="card-body">
+      <div class="tip"><strong>사용법.</strong> ChatGPT에서 레퍼런스 광고 이미지를 업로드하고 아래 프롬프트를 입력하세요.</div>
+      <div class="prompt-box" id="p2">첨부한 광고 이미지 스타일을 분석하고, 우리 브랜드 버전으로 바꿔줘.
 
-  <!-- 16개 앵글 -->
-  <section id="angles">
-    <h2>🎯 16개 전략 앵글 프롬프트</h2>
-    <div class="tip-box"><strong>사용법.</strong> 카드를 클릭하면 프롬프트가 펼쳐집니다. [Brand DNA]와 [제품명] 자리에 앞에서 추출한 내용을 붙여넣으세요.</div>
-    <div class="angle-grid" id="angleGrid"></div>
-  </section>
+【우리 브랜드 DNA】
+[마스터 프롬프트에서 나온 Brand DNA 붙여넣기]
 
-  <!-- 광고 유형 50개 -->
-  <section id="types">
-    <h2>📋 광고 유형 라이브러리 50개</h2>
-    <div class="tip-box"><strong>사용법.</strong> 유형 카드를 클릭하면 해당 유형에 맞는 카피 프롬프트가 나옵니다.</div>
-    <div id="typeLibrary"></div>
-  </section>
-
-  <!-- 이미지 생성 -->
-  <section id="image">
-    <h2>🖼️ 이미지 생성 프롬프트 (DALL-E / ChatGPT)</h2>
-    <div class="tip-box"><strong>워크플로우.</strong> 아래 프롬프트를 Claude에 넣으면 → DALL-E용 이미지 프롬프트가 나옵니다 → 그걸 ChatGPT에 붙여넣으면 → 광고 이미지 완성.</div>
-
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Step 1 — 제품 이미지 → 광고 이미지 프롬프트 생성</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'img1')">복사</button>
-      </div>
-      <pre id="img1">아래 제품 정보와 Brand DNA를 바탕으로 DALL-E(ChatGPT)에 넣을 광고 이미지 프롬프트를 만들어줘.
-
-【제품 정보】
-제품명:
-제품 색상/형태:
-주요 특징:
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【광고 방향】
-앵글: [16개 앵글 중 선택]
-무드: [클린 미니멀 / 럭셔리 / 비비드 팝 / 내추럴 / 에디토리얼 / 다크 무드 중 선택]
-비율: [1:1 / 4:5 / 9:16 / 16:9 중 선택]
-배경: [흰 배경 / 라이프스타일 / 스튜디오 / 야외 / 기타]
-
-출력 형식:
-1. DALL-E 영문 프롬프트 (이미지 생성용)
-2. 네거티브 프롬프트 (피해야 할 요소)
-3. 이미지에 들어갈 광고 카피 텍스트 1줄</pre>
+분석 후 출력:
+1. 레퍼런스 이미지 스타일 분석 (구도 / 조명 / 색감 / 무드)
+2. 우리 브랜드에 맞게 적용한 DALL-E 영문 프롬프트
+3. 네거티브 프롬프트</div>
+      <button class="copy-btn" onclick="copyEl(this,'p2')">복사</button>
     </div>
+  </div>
 
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Step 2 — 레퍼런스 이미지 → 우리 브랜드 스타일로 변환</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'img2')">복사</button>
-      </div>
-      <pre id="img2">【ChatGPT에서 직접 사용 — 레퍼런스 이미지 업로드 후 아래 프롬프트 입력】
+  <div class="card" id="c3">
+    <div class="card-head" onclick="toggle('c3')">
+      <div class="card-title"><span class="step-badge">무드</span>같은 제품, 6가지 분위기 버전</div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="card-sub">A/B 테스트용</div><span class="chevron">▼</span></div>
+    </div>
+    <div class="card-body">
+      <div class="prompt-box" id="p3">위에서 나온 제품 정보와 Brand DNA를 바탕으로 6가지 무드 버전 DALL-E 프롬프트를 만들어줘.
 
-첨부한 광고 이미지의 레이아웃, 구도, 조명, 분위기를 분석해줘.
-그리고 아래 우리 브랜드 정보에 맞게 동일한 스타일로 새 광고 이미지를 만들 DALL-E 프롬프트를 작성해줘.
+① 클린 미니멀 — 흰 배경, 여백 강조, 심플한 조명
+② 럭셔리 — 어두운 배경, 골드 포인트, 드라마틱 조명
+③ 비비드 팝 — 원색 배경, 강렬한 색감, 트렌디
+④ 내추럴 — 자연광, 식물/린넨 텍스처, 따뜻한 톤
+⑤ 에디토리얼 — 패션 매거진 스타일, 모델 포함
+⑥ 라이프스타일 — 실제 사용 장면, 일상 배경
 
-【우리 브랜드 정보】
-제품명:
-제품 색상/형태:
-브랜드 컬러:
-톤앤매너:
+각 무드마다:
+- DALL-E 영문 프롬프트
+- 네거티브 프롬프트
+- 어울리는 카피 톤 한 줄</div>
+      <button class="copy-btn" onclick="copyEl(this,'p3')">복사</button>
+    </div>
+  </div>
+
+  <div class="card" id="c4">
+    <div class="card-head" onclick="toggle('c4')">
+      <div class="card-title"><span class="step-badge">앵글</span>앵글 추가 생성 (16종)</div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="card-sub">원하는 앵글 선택</div><span class="chevron">▼</span></div>
+    </div>
+    <div class="card-body">
+      <div class="tip"><strong>사용법.</strong> 아래에서 원하는 앵글을 클릭하면 해당 번호가 표시됩니다. 프롬프트 복사 후 번호 자리에 입력하세요.</div>
+      <div class="opt-label">앵글 선택 (클릭)</div>
+      <div class="option-row" id="angle-chips"></div>
+      <div class="prompt-box" id="p4">위에서 나온 Brand DNA를 바탕으로 아래 앵글로 광고 카피 + DALL-E 이미지 프롬프트 세트를 만들어줘.
+
+앵글: [선택한 앵글 입력]
 
 출력:
-1. 레퍼런스 이미지 분석 요약
-2. 우리 브랜드 버전 DALL-E 영문 프롬프트
-3. 네거티브 프롬프트</pre>
+① 헤드라인 1줄 + 본문 3줄 + CTA
+② 위 카피에 맞는 DALL-E 영문 프롬프트 (1:1 비율)
+③ 네거티브 프롬프트
+
+카피 3개 버전으로.</div>
+      <button class="copy-btn" onclick="copyEl(this,'p4')">복사</button>
     </div>
+  </div>
 
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Step 3 — 비율별 광고 이미지 세트 생성</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'img3')">복사</button>
-      </div>
-      <pre id="img3">아래 광고 콘셉트를 4가지 비율 버전으로 각각 DALL-E 프롬프트를 만들어줘.
-
-【광고 콘셉트】
-제품:
-무드/스타일:
-핵심 카피:
-Brand DNA 톤:
-
-【비율별 출력】
-① 1:1 — 인스타그램 피드 정방형
-② 4:5 — 인스타그램 피드 세로형
-③ 9:16 — 스토리 / 릴스 / 숏폼
-④ 16:9 — 유튜브 썸네일 / 배너
-
-각 비율마다 구도와 레이아웃이 어떻게 달라져야 하는지 설명 + DALL-E 프롬프트 제공.</pre>
+  <div class="card" id="c5">
+    <div class="card-head" onclick="toggle('c5')">
+      <div class="card-title"><span class="step-badge">글로벌</span>다국어 광고 세트</div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="card-sub">언어별 현지화</div><span class="chevron">▼</span></div>
     </div>
+    <div class="card-body">
+      <div class="prompt-box" id="p5">위에서 만든 카피를 아래 언어로 현지화하고, 각 언어에 맞는 DALL-E 이미지 프롬프트도 함께 만들어줘.
 
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Step 4 — 텍스트 포함 광고 이미지 (카피 + 비주얼 일체형)</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'img4')">복사</button>
-      </div>
-      <pre id="img4">광고 카피가 이미지 안에 자연스럽게 들어간 광고 비주얼을 만들 DALL-E 프롬프트를 작성해줘.
+원본 카피: [카피 붙여넣기]
+Brand DNA: [붙여넣기]
 
-【광고 정보】
-제품:
-헤드라인 카피: [예: "백탁 없이, 한 겹 가볍게"]
-서브 카피: [예: "SPF50+ PA++++"]
-브랜드 컬러:
-무드:
-비율:
+번역할 언어: [영어 / 일본어 / 중국어 간체 / 프랑스어 — 원하는 것 선택]
 
-조건:
-- 텍스트가 이미지 구도 안에 자연스럽게 배치
-- 제품이 메인으로 보이게
-- 한국어/영어 중 선택: [한국어 / 영어]
-
-DALL-E 영문 프롬프트 + 텍스트 배치 설명 제공.</pre>
+각 언어별 출력:
+① 현지화 카피 (직역 X, 현지 감성으로)
+② DALL-E 영문 프롬프트 (현지 광고 감성 반영)
+③ 현지 시장 포인트 한 줄</div>
+      <button class="copy-btn" onclick="copyEl(this,'p5')">복사</button>
     </div>
+  </div>
 
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">Step 5 — 다국어 광고 이미지 세트</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'img5')">복사</button>
-      </div>
-      <pre id="img5">같은 광고 비주얼을 다국어 버전으로 만들 계획이야. 각 언어별로 카피를 현지화하고 DALL-E 프롬프트도 함께 제공해줘.
-
-【원본 광고】
-제품:
-원본 한국어 카피:
-비주얼 스타일:
-비율:
-
-【출력 언어 선택】 (원하는 것 체크)
-□ 영어 (미국/글로벌)
-□ 영어 (영국)
-□ 일본어
-□ 중국어 간체
-□ 프랑스어
-□ 기타:
-
-각 언어별로:
-1. 현지화된 카피 (직역 X, 감성 현지화)
-2. 해당 언어 버전 DALL-E 프롬프트
-3. 현지 시장 광고 감성 포인트 한 줄 설명</pre>
+  <div class="card" id="c6">
+    <div class="card-head" onclick="toggle('c6')">
+      <div class="card-title"><span class="step-badge">URL 없을 때</span>제품 정보 직접 입력 버전</div>
+      <div style="display:flex;align-items:center;gap:12px"><div class="card-sub">URL 없을 때 사용</div><span class="chevron">▼</span></div>
     </div>
+    <div class="card-body">
+      <div class="prompt-box" id="p6">아래 제품 정보를 바탕으로 광고 소재 한 세트를 만들어줘.
 
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">무드 프리셋 — 같은 제품 다른 분위기</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'img6')">복사</button>
-      </div>
-      <pre id="img6">같은 제품을 6가지 무드로 광고 이미지 프롬프트를 만들어줘. A/B 테스트용이야.
-
-【제품 정보】
+브랜드명:
 제품명:
-제품 색상/형태:
-Brand DNA:
+주요 특징/성분:
+타깃 고객:
+가격대:
+브랜드 강점:
 
-【6가지 무드별 DALL-E 프롬프트】
-① 클린 미니멀 — 흰 배경, 여백 강조, 심플
-② 럭셔리 — 어두운 배경, 골드/실버 포인트, 고급스러운 조명
-③ 비비드 팝 — 원색 배경, 강렬한 색감, 트렌디
-④ 내추럴 — 자연광, 식물/텍스처 배경, 따뜻한 톤
-⑤ 에디토리얼 — 패션 매거진 스타일, 모델 포함, 예술적
-⑥ 라이프스타일 — 실제 사용 장면, 일상적 배경
+━━━━━━━━━━━━━━━━
+【STEP 1】 Brand DNA 정리
+━━━━━━━━━━━━━━━━
+위 정보로 Brand DNA 6개 항목 정리
 
-각 무드마다 영문 DALL-E 프롬프트 + 어울리는 카피 톤 한 줄.</pre>
+━━━━━━━━━━━━━━━━
+【STEP 2】 카피 3세트
+━━━━━━━━━━━━━━━━
+① 공감 앵글
+② 결과 앵글
+③ 라이프스타일 앵글
+각각 헤드라인 + 본문 3줄 + CTA
+
+━━━━━━━━━━━━━━━━
+【STEP 3】 DALL-E 프롬프트 3개
+━━━━━━━━━━━━━━━━
+카피 3개에 각각 어울리는 이미지 프롬프트
+(영문 + 네거티브 프롬프트 포함)</div>
+      <button class="copy-btn" onclick="copyEl(this,'p6')">복사</button>
     </div>
-  </section>
-
-  <!-- 콤보 프롬프트 -->
-  <section id="combo">
-    <h2>⚡ 콤보 프롬프트 (올인원)</h2>
-    <div class="tip-box"><strong>이걸 가장 많이 쓰게 됩니다.</strong> Brand DNA + 앵글 + 유형을 한 번에 넣어서 완성된 카피를 바로 받는 방식입니다.</div>
-
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">기본 콤보 — 카피 5개 생성</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'combo1')">복사</button>
-      </div>
-      <pre id="combo1">아래 Brand DNA와 조건으로 광고 카피를 만들어줘.
-
-【Brand DNA】
-[앞에서 추출한 Brand DNA 전체 붙여넣기]
-
-【광고 조건】
-- 앵글: [16개 앵글 중 선택]
-- 광고 유형: [50개 유형 중 선택]
-- 채널: [인스타그램 피드 / 페이스북 / 네이버 쇼핑 / 카카오 등]
-- 분량: 헤드라인 1줄 + 본문 3-5줄 + CTA 1줄
-- 톤: [Brand DNA 톤앤매너 참고]
-
-카피 5개 버전을 만들어줘. 각 버전마다 왜 이 접근법을 썼는지 한 줄로 설명 추가.</pre>
-    </div>
-
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">A/B 테스트용 — 2가지 앵글 비교</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'combo2')">복사</button>
-      </div>
-      <pre id="combo2">같은 제품을 두 가지 다른 앵글로 광고 카피를 만들어줘. A/B 테스트 목적이야.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【버전 A】
-앵글: [앵글 1]
-광고 유형: [유형 1]
-
-【버전 B】
-앵글: [앵글 2]
-광고 유형: [유형 2]
-
-각 버전당 카피 3개씩, 마지막에 두 앵글의 예상 반응 차이 분석 추가.</pre>
-    </div>
-
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">시리즈 광고 — 같은 제품 앵글 순환</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'combo3')">복사</button>
-      </div>
-      <pre id="combo3">한 달치 광고 소재를 만들어줘. 같은 제품을 다른 앵글로 순환하는 방식이야.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【조건】
-- 채널: [채널명]
-- 기간: 4주 (주 2개 소재 = 총 8개)
-- 유형: [원하는 유형 or "자유롭게"]
-
-각 주차별로 앵글을 다르게 해서 8개 카피 세트를 만들어줘.
-마지막에 추천 순서와 이유도 정리해줘.</pre>
-    </div>
-
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">경쟁사 분석 + 차별화 카피</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'combo4')">복사</button>
-      </div>
-      <pre id="combo4">경쟁사 광고를 분석하고 우리 브랜드 차별화 카피를 만들어줘.
-
-【우리 Brand DNA】
-[Brand DNA 붙여넣기]
-
-【경쟁사 정보】
-경쟁사명:
-경쟁사 주요 광고 문구/앵글:
-경쟁사 강점:
-경쟁사 약점:
-
-우리가 경쟁사와 다른 포지션으로 어필하는 카피 5개 만들어줘.
-직접 비교 언급은 피하고, 우리 강점으로 돌아오게 구성해줘.</pre>
-    </div>
-
-    <div class="prompt-card">
-      <div class="card-header">
-        <span class="card-title">글로벌 언어 변환</span>
-        <button class="copy-btn" onclick="copyPrompt(this, 'combo5')">복사</button>
-      </div>
-      <pre id="combo5">아래 한국어 광고 카피를 [타깃 언어]로 현지화해줘. 직역 말고 그 나라 광고 언어 감성으로 바꿔줘.
-
-【원본 카피】
-[한국어 카피 붙여넣기]
-
-【타깃 언어】: [영어 / 일본어 / 중국어 / 기타]
-【타깃 국가】:
-【현지 감성 포인트】: (알고 있으면 입력, 없으면 AI가 판단)
-
-현지화 버전 3개 + 각 버전의 현지화 포인트 설명 추가.</pre>
-    </div>
-  </section>
+  </div>
 
 </div>
 
-<footer>AI 광고 카피 자동화 플레이북 v1.0 · Personal Use Only</footer>
-
 <script>
-// 16개 앵글 데이터
-const angles = [
-  {
-    num: "01", name: "정체성 앵글", eng: "Identity",
-    desc: "\"나는 ~하는 사람이야\" — 타깃의 자아 정체성에 호소",
-    prompt: `다음 Brand DNA를 바탕으로 [정체성 앵글] 광고 카피를 만들어줘.
+const angleList = ['정체성','효능/결과','비교','반론처리','후기/증거','긴급성','호기심','공감','스토리텔링','교육/정보','사회적증거','권위','라이프스타일','두려움','희소성','가치역전'];
 
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【정체성 앵글 조건】
-- 타깃이 스스로를 정의하는 방식으로 시작
-- "나는 ~하는 사람이야" / "~하는 사람들을 위해"
-- 제품이 그 정체성을 강화/표현하는 도구로 포지셔닝
-- 헤드라인 + 본문 3줄 + CTA
-
-카피 3개 버전, 각기 다른 정체성 각도로.`
-  },
-  {
-    num: "02", name: "효능/결과 앵글", eng: "Result",
-    desc: "구체적 수치와 결과로 신뢰 확보",
-    prompt: `다음 Brand DNA를 바탕으로 [효능/결과 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【결과 앵글 조건】
-- 구체적 숫자/수치 반드시 포함 (없으면 추론 or 비워두기 표시)
-- "~일 만에", "~% 개선", "~명이 선택" 형식
-- 과장 금지, 팩트 베이스
-- 헤드라인 + 본문 3줄 + CTA
-
-카피 3개 버전.`
-  },
-  {
-    num: "03", name: "비교 앵글", eng: "Comparison",
-    desc: "경쟁사/기존 방식 대비 우월성 강조",
-    prompt: `다음 Brand DNA를 바탕으로 [비교 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【비교 앵글 조건】
-- 경쟁사 직접 언급 없이 "기존 방식" vs "우리 방식" 구도
-- 고객이 기존에 겪던 불편/한계를 먼저 인정
-- 우리 제품이 그 한계를 해결한다는 흐름
-- 헤드라인 + 본문 3줄 + CTA
-
-카피 3개 버전.`
-  },
-  {
-    num: "04", name: "반론 처리 앵글", eng: "Objection",
-    desc: "구매 망설임/반론을 먼저 꺼내고 해소",
-    prompt: `다음 Brand DNA를 바탕으로 [반론 처리 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【반론 처리 조건】
-- 타깃이 구매 전 가장 많이 하는 반론/의심 2-3개 먼저 파악
-- "~라고 생각하실 수 있어요. 그런데..." 패턴
-- 반론을 인정하고 → 증거로 해소 → 행동 유도
-- 헤드라인 + 본문 4줄 + CTA
-
-카피 3개 버전, 각기 다른 반론 포인트로.`
-  },
-  {
-    num: "05", name: "후기/증거 앵글", eng: "Testimonial",
-    desc: "실제 고객 목소리로 신뢰 극대화",
-    prompt: `다음 Brand DNA를 바탕으로 [후기/증거 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【후기 앵글 조건】
-- 실제 고객 후기처럼 자연스러운 말투
-- 구체적인 상황 + 결과 포함 (예: "3주째 쓰는데 ~")
-- 공감 가능한 일상적 디테일
-- 헤드라인 + 후기 형식 본문 + 브랜드 CTA
-
-카피 3개 버전 (각기 다른 고객 페르소나로).`
-  },
-  {
-    num: "06", name: "긴급성 앵글", eng: "Urgency",
-    desc: "지금 당장 행동해야 하는 이유 제공",
-    prompt: `다음 Brand DNA를 바탕으로 [긴급성 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【긴급성 앵글 조건】
-- 시간/수량/기회 제한 요소 포함
-- "지금 아니면 ~" / "마감 ~시간 전" 패턴
-- 인위적 긴박감 금지, 실제 이유 있게 구성
-- 헤드라인 + 본문 3줄 + 강한 CTA
-
-카피 3개 버전.`
-  },
-  {
-    num: "07", name: "호기심 앵글", eng: "Curiosity",
-    desc: "궁금증을 유발해 클릭/읽기를 유도",
-    prompt: `다음 Brand DNA를 바탕으로 [호기심 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【호기심 앵글 조건】
-- 헤드라인에서 답을 바로 주지 않고 궁금증 유발
-- "~하는 이유가 뭔지 알아?" / "대부분 모르는 ~" 패턴
-- 클릭/스크롤을 유도하는 열린 질문
-- 헤드라인 + 본문에서 점진적으로 답 공개
-
-카피 3개 버전.`
-  },
-  {
-    num: "08", name: "공감 앵글", eng: "Empathy",
-    desc: "고통과 좌절에 깊이 공감, 연결감 형성",
-    prompt: `다음 Brand DNA를 바탕으로 [공감 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【공감 앵글 조건】
-- 타깃의 핵심 고통점에서 시작
-- "저도 그랬어요" / "그 기분 알아요" 패턴
-- 판매보다 공감이 먼저, 제품은 해결책으로 자연스럽게 등장
-- 따뜻하고 진솔한 말투
-
-카피 3개 버전.`
-  },
-  {
-    num: "09", name: "스토리텔링 앵글", eng: "Story",
-    desc: "변화의 서사 — 전/후 스토리로 몰입 유도",
-    prompt: `다음 Brand DNA를 바탕으로 [스토리텔링 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【스토리 앵글 조건】
-- 기승전결 구조: 문제 상황 → 전환점(제품 발견) → 변화 결과
-- 주인공은 고객, 제품은 조력자
-- 구체적인 상황 묘사로 영화 장면처럼
-- 100-200자 내외 짧은 스토리 형식
-
-카피 3개 버전 (각기 다른 주인공 상황으로).`
-  },
-  {
-    num: "10", name: "교육/정보 앵글", eng: "Education",
-    desc: "모르던 사실을 알려주며 전문성과 신뢰 획득",
-    prompt: `다음 Brand DNA를 바탕으로 [교육/정보 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【교육 앵글 조건】
-- "~하는 사람들이 모르는 것" / "전문가가 말하는 ~" 패턴
-- 유용한 정보 먼저, 제품은 자연스럽게 연결
-- 리스트 형식 or 팁 형식
-- 신뢰감 있는 말투
-
-카피 3개 버전.`
-  },
-  {
-    num: "11", name: "사회적 증거 앵글", eng: "Social Proof",
-    desc: "숫자와 대중의 선택으로 안심 유도",
-    prompt: `다음 Brand DNA를 바탕으로 [사회적 증거 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【사회적 증거 조건】
-- 누적 수치 (판매량, 사용자, 별점) 포함
-- "~명이 선택했습니다" / "재구매율 ~%" 패턴
-- 특정 그룹/커뮤니티의 선택으로 어필
-- 헤드라인 + 수치 기반 본문 + CTA
-
-카피 3개 버전.`
-  },
-  {
-    num: "12", name: "권위 앵글", eng: "Authority",
-    desc: "전문가·기관·수상으로 공신력 확보",
-    prompt: `다음 Brand DNA를 바탕으로 [권위 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【권위 앵글 조건】
-- 전문가 추천, 수상, 언론 보도, 인증 활용
-- 없으면 "전문가 제조 기준" / "임상 검증" 등 과정 권위도 활용
-- 과장 없이 팩트만
-- 헤드라인 + 권위 근거 + 본문 + CTA
-
-카피 3개 버전.`
-  },
-  {
-    num: "13", name: "라이프스타일 앵글", eng: "Lifestyle",
-    desc: "이 제품을 쓰는 '나'의 모습을 상상하게 만들기",
-    prompt: `다음 Brand DNA를 바탕으로 [라이프스타일 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【라이프스타일 앵글 조건】
-- 제품 기능보다 "이걸 쓰는 나의 일상" 묘사
-- 구체적 장면 : 시간대, 공간, 감각 묘사
-- 타깃이 동경하는 라이프스타일 이미지
-- 감성적이고 영상미 있는 문장
-
-카피 3개 버전.`
-  },
-  {
-    num: "14", name: "두려움 앵글", eng: "Fear",
-    desc: "안 쓰면 생기는 손해/리스크를 부각",
-    prompt: `다음 Brand DNA를 바탕으로 [두려움 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【두려움 앵글 조건】
-- 문제를 방치했을 때 생기는 결과 먼저
-- 공포 조장 금지, 진짜 리스크만
-- "혹시 ~하고 계신가요?" 패턴
-- 해결책으로 자연스럽게 연결
-
-카피 3개 버전.`
-  },
-  {
-    num: "15", name: "희소성 앵글", eng: "Scarcity",
-    desc: "한정/품귀로 희소 가치 극대화",
-    prompt: `다음 Brand DNA를 바탕으로 [희소성 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【희소성 앵글 조건】
-- 수량 한정, 기간 한정, 조건 한정 중 실제에 맞게 선택
-- "이번이 마지막" / "딱 ~개 남았어요" 패턴
-- 거짓 희소성 금지
-- 강한 행동 유도 CTA
-
-카피 3개 버전.`
-  },
-  {
-    num: "16", name: "가치 역전 앵글", eng: "Value Flip",
-    desc: "가격이 아깝지 않은 이유, 오히려 안 사는 게 손해",
-    prompt: `다음 Brand DNA를 바탕으로 [가치 역전 앵글] 광고 카피를 만들어줘.
-
-【Brand DNA】
-[Brand DNA 붙여넣기]
-
-【가치 역전 조건】
-- 가격 자체보다 "안 사면 생기는 기회비용" 강조
-- "하루 ~원으로 ~를 얻는다" 패턴
-- 비용 대비 가치를 구체적 숫자로 환산
-- 가격 저항을 자연스럽게 해소
-
-카피 3개 버전.`
-  }
-];
-
-// 50개 광고 유형 데이터
-const adTypes = [
-  {
-    category: "A. 문제-해결형",
-    items: [
-      { num:"A01", name:"고통 직접 언급형", hook:"\"~때문에 힘드셨죠?\"", prompt:`아래 Brand DNA를 기반으로 [고통 직접 언급형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃의 가장 큰 고통을 첫 문장에 직접 꺼내고, 제품이 그 고통을 없애준다는 흐름으로 구성해줘. 공감 → 해결 → CTA 순서.` },
-      { num:"A02", name:"시도했지만 실패형", hook:"\"다 해봤는데 안 됐죠?\"", prompt:`아래 Brand DNA를 기반으로 [시도했지만 실패형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 이미 다른 방법을 시도했다가 실패한 경험을 인정하고, 이번엔 진짜 다르다는 이유를 설득하는 구조로 만들어줘.` },
-      { num:"A03", name:"전후 대비형", hook:"Before → After 극적 대비", prompt:`아래 Brand DNA를 기반으로 [전후 대비형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n사용 전 상태(문제)와 사용 후 상태(해결)를 극적으로 대비해서 구성해줘. 숫자나 구체적 변화 포함.` },
-      { num:"A04", name:"숨겨진 원인 폭로형", hook:"\"사실 원인은 따로 있어요\"", prompt:`아래 Brand DNA를 기반으로 [숨겨진 원인 폭로형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 몰랐던 진짜 문제 원인을 밝히고, 제품이 그 근본 원인을 해결한다고 포지셔닝해줘.` },
-      { num:"A05", name:"공통 오해 깨기형", hook:"\"사실 그건 잘못된 상식이에요\"", prompt:`아래 Brand DNA를 기반으로 [공통 오해 깨기형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 흔히 가진 잘못된 믿음을 지적하고, 올바른 정보와 함께 제품을 해결책으로 제시해줘.` },
-      { num:"A06", name:"나쁜 대안 비교형", hook:"\"그 방법엔 이런 문제가 있어요\"", prompt:`아래 Brand DNA를 기반으로 [나쁜 대안 비교형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 현재 쓰고 있거나 고려 중인 대안의 문제점을 짚고, 우리 제품이 더 나은 이유로 자연스럽게 연결해줘.` },
-      { num:"A07", name:"문제 심화 경고형", hook:"\"방치하면 더 심해져요\"", prompt:`아래 Brand DNA를 기반으로 [문제 심화 경고형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n지금 해결하지 않으면 문제가 어떻게 악화되는지 경고하고, 지금 행동해야 하는 이유로 연결해줘. 공포 조장 아닌 진짜 리스크 기반으로.` },
-      { num:"A08", name:"해결사 등장형", hook:"\"드디어 해결책이 나왔습니다\"", prompt:`아래 Brand DNA를 기반으로 [해결사 등장형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n오랜 문제에 마침내 해결책이 등장했다는 구성. 문제 → 해결책 발표 → 기대감 형성 순서.` },
-      { num:"A09", name:"고객 대신 말하기형", hook:"\"많은 분들이 이렇게 말씀하세요\"", prompt:`아래 Brand DNA를 기반으로 [고객 대신 말하기형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n고객의 실제 후기처럼 들리는 말투로, 브랜드가 고객 대신 말해주는 형식. 3인칭 or 인용 형식.` },
-      { num:"A10", name:"드디어 찾았다형", hook:"\"이거 찾고 있었잖아요\"", prompt:`아래 Brand DNA를 기반으로 [드디어 찾았다형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 오랫동안 찾아왔던 바로 그 제품이 여기 있다는 느낌. 발견의 기쁨과 안도감을 강조해줘.` }
-    ]
-  },
-  {
-    category: "B. 증거/신뢰형",
-    items: [
-      { num:"B01", name:"실제 후기 인용형", hook:"고객 목소리 직접 인용", prompt:`아래 Brand DNA를 기반으로 [실제 후기 인용형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n실제 고객이 남긴 것 같은 구체적 후기를 메인으로 구성. 이름/나이대/구매 시기 등 디테일 포함. 인용구 형식 사용.` },
-      { num:"B02", name:"수치 나열형", hook:"숫자로 말한다", prompt:`아래 Brand DNA를 기반으로 [수치 나열형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n핵심 수치들을 헤드라인에 집중 배치. 판매량, 재구매율, 성분 함량, 임상 데이터 등. 숫자가 스스로 설득하게 구성해줘.` },
-      { num:"B03", name:"전문가 추천형", hook:"전문가가 말합니다", prompt:`아래 Brand DNA를 기반으로 [전문가 추천형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n해당 분야 전문가(의사/영양사/디자이너 등)가 추천하는 형식. 전문 용어 적절히 활용, 신뢰감 있는 말투.` },
-      { num:"B04", name:"언론/수상 강조형", hook:"\"~에 선정되었습니다\"", prompt:`아래 Brand DNA를 기반으로 [언론/수상 강조형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n언론 보도, 수상 내역, 선정 이력을 메인 신뢰 요소로 활용. 공신력 있는 제3자의 검증 형식.` },
-      { num:"B05", name:"판매량/사용자수형", hook:"\"~만 명이 선택\"", prompt:`아래 Brand DNA를 기반으로 [판매량/사용자수형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n대규모 사용자 수, 판매량을 사회적 증거로 활용. 숫자의 규모감으로 안심시키는 구성.` },
-      { num:"B06", name:"Before/After형", hook:"변화를 눈으로 확인", prompt:`아래 Brand DNA를 기반으로 [Before/After형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n사용 전후 차이를 텍스트로 극적으로 보여줘. 이미지 캡션으로 쓸 수 있게 간결하게.` },
-      { num:"B07", name:"인증서/성분 공개형", hook:"투명하게 공개합니다", prompt:`아래 Brand DNA를 기반으로 [인증서/성분 공개형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n성분, 제조 방식, 인증 내역을 투명하게 공개하는 신뢰 형성 카피. "숨기는 것 없음"을 강조.` },
-      { num:"B08", name:"실험/테스트 결과형", hook:"직접 실험해봤습니다", prompt:`아래 Brand DNA를 기반으로 [실험/테스트 결과형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n임상 실험, 자체 테스트, 비교 실험 결과를 카피로 구성. 실험 과정 언급으로 신뢰 극대화.` },
-      { num:"B09", name:"누적 재구매형", hook:"또 사는 이유가 있습니다", prompt:`아래 Brand DNA를 기반으로 [누적 재구매형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n재구매율 or 단골 고객 비율을 메인 신뢰 요소로. "한 번 써보고 계속 찾는" 이유를 카피로.` },
-      { num:"B10", name:"상세 스펙 공개형", hook:"숫자로 증명합니다", prompt:`아래 Brand DNA를 기반으로 [상세 스펙 공개형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n제품의 기술적 스펙/성분 함량/제조 기준 등 디테일을 나열. 전문가 고객 타깃에 효과적.` }
-    ]
-  },
-  {
-    category: "C. 감성/스토리형",
-    items: [
-      { num:"C01", name:"창업자 스토리형", hook:"왜 만들었는지 이야기합니다", prompt:`아래 Brand DNA를 기반으로 [창업자 스토리형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n창업자가 이 제품을 만들게 된 개인적 이야기. 1인칭 진솔한 말투. 문제 경험 → 해결책 개발 → 브랜드 탄생 순서.` },
-      { num:"C02", name:"고객 변화 스토리형", hook:"이 분의 이야기입니다", prompt:`아래 Brand DNA를 기반으로 [고객 변화 스토리형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n실제 고객처럼 들리는 변화 스토리. 전 → 만남 → 후 구조. 구체적 상황과 감정 묘사 포함.` },
-      { num:"C03", name:"일상 공감형", hook:"이 순간 공감되시나요?", prompt:`아래 Brand DNA를 기반으로 [일상 공감형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃의 흔한 일상 장면에서 시작. "이런 경험 있으세요?" 패턴. 공감 → 해결책 순서.` },
-      { num:"C04", name:"꿈/목표 투영형", hook:"이런 내가 되고 싶다", prompt:`아래 Brand DNA를 기반으로 [꿈/목표 투영형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 되고 싶은 이상적 모습을 그리고, 제품이 그 목표에 가까워지는 도구로 포지셔닝.` },
-      { num:"C05", name:"과거의 나 vs 지금의 나형", hook:"달라진 이야기", prompt:`아래 Brand DNA를 기반으로 [과거의 나 vs 지금의 나형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n과거 힘들었던 나와 현재 달라진 나를 대비. 제품이 그 변화의 핵심 계기로.` },
-      { num:"C06", name:"누군가를 위한 선물형", hook:"이 사람에게 주고 싶어요", prompt:`아래 Brand DNA를 기반으로 [선물 앵글형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n특정 관계(엄마, 친구, 연인 등)에게 선물하고 싶은 감성. 기념일/이유 있는 선물 구성.` },
-      { num:"C07", name:"계절/시간 감성형", hook:"이 계절에 맞는 이야기", prompt:`아래 Brand DNA를 기반으로 [계절/시간 감성형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n현재 계절, 시간대, 날씨 등 시의성 있는 감성 연결. 지금 이 순간과 제품의 연결고리.` },
-      { num:"C08", name:"작은 사치 허용형", hook:"이 정도는 괜찮아요", prompt:`아래 Brand DNA를 기반으로 [작은 사치 허용형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n"열심히 살았으니 나를 위한 이 정도는 괜찮다"는 자기합리화 욕구에 공명. 나만을 위한 소확행 감성.` },
-      { num:"C09", name:"가족/관계 중심형", hook:"함께하는 이야기", prompt:`아래 Brand DNA를 기반으로 [가족/관계 중심형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n가족, 친구, 연인 등 관계 속에서 제품이 주는 가치. 혼자가 아닌 함께하는 순간 강조.` },
-      { num:"C10", name:"레트로/향수형", hook:"그때 그 기억", prompt:`아래 Brand DNA를 기반으로 [레트로/향수형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n과거의 좋은 기억과 감성을 소환. 복고 감성 or 어릴 때 기억 등 노스탤지어 활용.` }
-    ]
-  },
-  {
-    category: "D. 교육/정보형",
-    items: [
-      { num:"D01", name:"몰랐던 사실 공개형", hook:"사실 이런 거 몰랐죠?", prompt:`아래 Brand DNA를 기반으로 [몰랐던 사실 공개형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 몰랐던 업계 사실, 성분 진실, 잘못된 상식을 공개하며 관심 유발. 정보 제공 → 제품 연결.` },
-      { num:"D02", name:"올바른 사용법형", hook:"제대로 쓰는 방법", prompt:`아래 Brand DNA를 기반으로 [올바른 사용법형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n제품 카테고리를 제대로 활용하는 방법 안내. 교육적 콘텐츠로 신뢰 구축 → 자연스럽게 제품 소개.` },
-      { num:"D03", name:"Top N 이유형", hook:"\"이유 5가지를 알려드릴게요\"", prompt:`아래 Brand DNA를 기반으로 [Top N 이유형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n"~를 해야 하는 이유 N가지" or "~가 좋은 이유 N가지" 리스트 형식. 스크롤을 유도하는 구성.` },
-      { num:"D04", name:"전문가 팁형", hook:"전문가가 알려주는 팁", prompt:`아래 Brand DNA를 기반으로 [전문가 팁형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n해당 분야 전문가처럼 유용한 팁을 제공하는 형식. 콘텐츠 마케팅 스타일.` },
-      { num:"D05", name:"비교 분석형", hook:"이것 vs 저것", prompt:`아래 Brand DNA를 기반으로 [비교 분석형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n두 가지 옵션을 객관적으로 비교 분석하는 형식. 표 or 리스트 형식 권장. 자연스럽게 우리 제품 우위로.` }
-    ]
-  },
-  {
-    category: "E. 긴급성/희소성형",
-    items: [
-      { num:"E01", name:"마감 카운트다운형", hook:"\"D-3\"", prompt:`아래 Brand DNA를 기반으로 [마감 카운트다운형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n특정 마감 시한을 메인으로. 카운트다운 느낌의 강한 긴박감. 마감 이후 어떻게 되는지 명시.` },
-      { num:"E02", name:"한정 수량형", hook:"\"딱 50개만\"", prompt:`아래 Brand DNA를 기반으로 [한정 수량형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n수량 한정을 메인 메시지로. 실제 수량 명시. "놓치면 다음은 없다"는 느낌.` },
-      { num:"E03", name:"가격 인상 예고형", hook:"\"곧 오릅니다\"", prompt:`아래 Brand DNA를 기반으로 [가격 인상 예고형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n가격 인상 예정을 공지하며 지금 구매 유도. 인상 시기/금액 명시. 합리적 이유 설명.` },
-      { num:"E04", name:"시즌 한정형", hook:"이 시즌에만 나오는", prompt:`아래 Brand DNA를 기반으로 [시즌 한정형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n특정 계절/이벤트 한정 제품 or 패키지. 시즌 특별감을 강조.` },
-      { num:"E05", name:"선착순형", hook:"\"선착순 100명\"", prompt:`아래 Brand DNA를 기반으로 [선착순형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n선착순 혜택(할인, 사은품, 보너스)을 메인으로. 경쟁심 자극으로 빠른 행동 유도.` }
-    ]
-  },
-  {
-    category: "F. 포맷 특화형",
-    items: [
-      { num:"F01", name:"카드뉴스형 (5장)", hook:"스와이프해서 보세요", prompt:`아래 Brand DNA를 기반으로 [카드뉴스형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n5장 카드뉴스 구성:\n1장: 관심 유발 헤드라인\n2장: 문제 제시\n3장: 해결책 소개\n4장: 증거/후기\n5장: CTA\n각 장마다 메인 텍스트 1-2줄 + 서브 텍스트.` },
-      { num:"F02", name:"리스트형", hook:"\"5가지 이유\"", prompt:`아래 Brand DNA를 기반으로 [리스트형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n헤드라인 + 3-5개 bullet point 리스트 + CTA 구성. 각 포인트는 한 줄씩 임팩트 있게.` },
-      { num:"F03", name:"질문-답변형", hook:"궁금하셨죠?", prompt:`아래 Brand DNA를 기반으로 [질문-답변형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\nQ&A 형식. 타깃이 자주 묻는 질문 3개를 먼저 제시하고 간결하게 답변. 마지막에 CTA.` },
-      { num:"F04", name:"공지/안내형", hook:"중요한 안내입니다", prompt:`아래 Brand DNA를 기반으로 [공지/안내형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n공식 공지처럼 포맷. "[중요]", "[안내]" 태그 활용. 정보 전달 스타일로 신뢰감 있게.` },
-      { num:"F05", name:"대화체 시나리오형", hook:"이런 대화 나눠본 적 있죠?", prompt:`아래 Brand DNA를 기반으로 [대화체 시나리오형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n두 사람의 대화 형식으로 제품 소개. 자연스러운 대화 속에 핵심 메시지 녹여내기.` },
-      { num:"F06", name:"뉴스레터 스타일형", hook:"구독자에게 보내는 편지", prompt:`아래 Brand DNA를 기반으로 [뉴스레터 스타일형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n개인 편지처럼 "안녕하세요"로 시작. 이번 달 소식/팁 형식으로 제품 자연스럽게 삽입.` },
-      { num:"F07", name:"밈/트렌드 활용형", hook:"요즘 뜨는 것과 연결", prompt:`아래 Brand DNA를 기반으로 [밈/트렌드 활용형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n현재 유행하는 밈, 표현, 트렌드 언어를 활용. 공감대 형성 → 브랜드 연결. (밈은 직접 넣어줄게요)` },
-      { num:"F08", name:"챌린지/참여형", hook:"같이 해봐요", prompt:`아래 Brand DNA를 기반으로 [챌린지/참여형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n타깃이 직접 참여하는 챌린지 형식. 간단한 액션 제안 → 공유 유도 → 브랜드 해시태그.` },
-      { num:"F09", name:"UGC 스타일형", hook:"고객이 올린 것처럼", prompt:`아래 Brand DNA를 기반으로 [UGC 스타일형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n실제 사용자가 SNS에 올린 것 같은 자연스러운 형식. 완벽한 광고 느낌 제거. 진짜 같은 일상 문체.` },
-      { num:"F10", name:"비포어 애프터 슬라이드형", hook:"넘기면 바뀝니다", prompt:`아래 Brand DNA를 기반으로 [비포어 애프터 슬라이드형] 광고 카피를 만들어줘.\n\n【Brand DNA】\n[붙여넣기]\n\n슬라이드 1: 문제 상황 (Before) 텍스트\n슬라이드 2: 해결 결과 (After) 텍스트\n각각 임팩트 있게 1-2줄로.` }
-    ]
-  }
-];
-
-// 앵글 카드 렌더링
-const grid = document.getElementById('angleGrid');
-angles.forEach((a, i) => {
-  const card = document.createElement('div');
-  card.className = 'angle-card';
-  card.innerHTML = `<div class="num">ANGLE ${a.num} · ${a.eng}</div><div class="name">${a.name}</div><div class="desc">${a.desc}</div>`;
-  card.onclick = () => toggleAngle(i);
-  grid.appendChild(card);
-
-  const detail = document.createElement('div');
-  detail.className = 'angle-detail';
-  detail.id = `angle-detail-${i}`;
-  detail.innerHTML = `<pre id="angle-prompt-${i}">${a.prompt}</pre><div class="detail-footer"><button class="copy-btn" onclick="copyPrompt(this,'angle-prompt-${i}')">복사</button></div>`;
-  grid.appendChild(detail);
+const chipsEl = document.getElementById('angle-chips');
+angleList.forEach(a => {
+  const chip = document.createElement('div');
+  chip.className = 'opt-chip';
+  chip.textContent = a;
+  chip.onclick = () => {
+    document.querySelectorAll('.opt-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+  };
+  chipsEl.appendChild(chip);
 });
 
-function toggleAngle(i) {
-  const detail = document.getElementById(`angle-detail-${i}`);
-  detail.style.display = detail.style.display === 'block' ? 'none' : 'block';
+function toggle(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
 }
 
-// 광고 유형 렌더링
-const typeLib = document.getElementById('typeLibrary');
-adTypes.forEach(cat => {
-  const section = document.createElement('div');
-  section.className = 'type-category';
-  section.innerHTML = `<h3>${cat.category}</h3>`;
-  const grid = document.createElement('div');
-  grid.className = 'type-grid';
-
-  cat.items.forEach((item, j) => {
-    const id = `type-${item.num}`;
-    const card = document.createElement('div');
-    card.className = 'type-item';
-    card.innerHTML = `<div class="type-num">${item.num}</div><div class="type-name">${item.name}</div><div class="type-hook">${item.hook}</div>`;
-    card.onclick = () => toggleType(id);
-    grid.appendChild(card);
-  });
-
-  section.appendChild(grid);
-
-  cat.items.forEach(item => {
-    const id = `type-${item.num}`;
-    const detail = document.createElement('div');
-    detail.className = 'type-detail';
-    detail.id = id;
-    detail.innerHTML = `<pre id="prompt-${item.num}">${item.prompt}</pre><div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="copy-btn" onclick="copyPrompt(this,'prompt-${item.num}')">복사</button></div>`;
-    grid.appendChild(detail);
-  });
-
-  typeLib.appendChild(section);
-});
-
-function toggleType(id) {
-  const el = document.getElementById(id);
-  el.style.display = el.style.display === 'block' ? 'none' : 'block';
-}
-
-function copyPrompt(btn, id) {
+function copyEl(btn, id) {
   const text = document.getElementById(id).innerText;
   navigator.clipboard.writeText(text).then(() => {
     btn.textContent = '복사됨!';
